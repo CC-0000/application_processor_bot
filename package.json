@@ -1,0 +1,17 @@
+{
+  "type": "module",
+  "name": "progress_tracker",
+  "version": "1.0.0",
+  "description": "discord bot to track application status",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.15.2",
+    "oracledb": "^6.5.0",
+    "sequelize": "^6.37.3"
+  }
+}
