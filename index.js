@@ -1,5 +1,6 @@
 import config from './config.json' with { type: "json" };  
 import { Sequelize, DataTypes  } from 'sequelize';
+import { gql, request } from "graphql-request"; 
 
 // Discord Bot Code
 import { Client, GatewayIntentBits } from 'discord.js';
@@ -47,18 +48,78 @@ client.on('messageCreate', message => {
         message.reply(messageString); 
       })
     }
-
   }
 });
 
 client.login(config.TOKEN);
+
+// Code for Leetcode Querying
+const getDailyQuery = gql`
+  query {
+    activeDailyCodingChallengeQuestion {
+      link
+    }
+  }
+`;
+
+async function fetchDaily() {
+  const res = await request("https://leetcode.com/graphql", getDailyQuery);
+  const link = "https://leetcode.com" + res['activeDailyCodingChallengeQuestion']['link'];
+
+  const channel = await client.channels.cache.find(channel => channel.name === "lc-grind")
+  const now = new Date();
+  const message_to_send = "Daily " + (now.getUTCMonth() + 1) + "/" + now.getUTCDate() + ": " + link;
+  channel.send({content: message_to_send})
+}
+
+function createDateWithUTCTime(hourUTC, minuteUTC) {
+  const now = new Date();
+
+  // Create a new date object for the current date with specified UTC time
+  const targetDate = new Date(Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate(),
+    hourUTC,
+    minuteUTC,
+    0, // Seconds
+    0  // Milliseconds
+  ));
+
+  return targetDate;
+}
+
+function fireAtTime(hour, minute, func) {
+  const now = new Date();
+  const targetTime = createDateWithUTCTime(hour, minute);
+  // const targetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0, 0);
+
+  if (now > targetTime) {
+    targetTime.setDate(targetTime.getDate() + 1);
+  }
+
+  const delay = targetTime - now;
+  setTimeout(() => {
+    func();
+    setInterval(() => {
+      func();
+    }, 24 * 60 * 60 * 1000); // 24 hours
+  }, delay);
+}
+
+fireAtTime(0, 30, () => {
+  console.log('fetching and posting daily')
+  fetchDaily();
+});
+
 
 // Define SQL Models and Connect to DATABASE
 const sequelize = new Sequelize({
   dialect: 'oracle',
   username: config.username,
   password: config.password,
-  dialectOptions: {connectString: config.connectionString}});
+  dialectOptions: {connectString: config.connectionString}}
+);
 
 const Entry = sequelize.define(
   'Entry',
@@ -128,38 +189,8 @@ async function addEntry(user, company, progress)
     if (!created) {
       console.log('failed to create the database entry')
     }
-    // console.log('trying connection')
-    // // Use the connection string copied from the cloud console
-    // // and stored in connstring.txt file from Step 2 of this tutorial
-    // connection = await oracledb.getConnection({ user: config.username, password: config.password, connectionString: config.connectionString });
-    // console.log('connection obtained')
-    // // Create a table
-    // await connection.execute(`begin execute immediate 'drop table nodetab'; exception when others then if sqlcode <> -942 then raise; end if; end;`);
-    // await connection.execute(`create table nodetab (id number, data varchar2(20))`);
-
-    // // Insert some rows
-    // const sql = `INSERT INTO nodetab VALUES (:1, :2)`;
-    // const binds = [ [1, "First" ], [2, "Second" ], [3, "Third" ], [4, "Fourth" ], [5, "Fifth" ], [6, "Sixth" ], [7, "Seventh" ] ];
-    // await connection.executeMany(sql, binds);
-    // // connection.commit(); // uncomment to make data persistent
-
-    // // Now query the rows back
-    // const result = await connection.execute(`SELECT * FROM nodetab`);
-    // console.dir(result.rows, { depth: null });
-
-
-
   } catch (err) {
     console.error(err);
-  } finally {
-//   if (connection)
-//     {
-//       try {
-//           await connection.close();
-//         } catch (err) {
-//           console.error(err);
-//       }
-//     }
   }
 }
 
