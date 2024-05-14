@@ -1,6 +1,5 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import config from './config.json' with { type: "json" };
-import { addEntry, deleteEntry, getStats } from './progress.js';
 import { fireAtTime,fetchDaily } from './lc_daily.js';  
 import { Sequelize, DataTypes  } from 'sequelize';
 
@@ -96,8 +95,8 @@ const Entry = sequelize.define(
   {
     // Model attributes are defined here
     id: {
-      type: DataTypes.UUID.V4,  // maps to UUID V4
-      defaultValue: sql.uuidV4, // auto generate
+      type: DataTypes.UUID,  // maps to UUID V4
+      defaultValue: DataTypes.UUIDV4 , // auto generate
       primaryKey: true,         // this is the table's primary key
       allowNull: false,         // value cannot be null
     },
@@ -111,7 +110,7 @@ const Entry = sequelize.define(
       type: DataTypes.STRING,
     },
     timestamp: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATE(6),
       defaultValue: DataTypes.NOW
     }
   },
@@ -121,6 +120,114 @@ const Entry = sequelize.define(
 );
 
 Entry.sync();
+
+async function deleteEntry(user, company, progress) {
+	try {
+		Entry.destroy({
+			where: {
+				user: user,
+				company: company,
+				progress: progress,
+			},
+		});
+	} catch (err) {
+		console.error(err);
+	}
+}
+
+async function addEntry(user, company, progress) {
+	try {
+		const [_, created] = await Entry.findOrCreate({
+			where: { user: user, company: company, progress: progress },
+			defaults: {},
+		});
+    
+		if (!created) {
+			console.log("failed to create the database entry");
+		}
+	} catch (err) {
+		console.error(err);
+	}
+}
+
+async function getStats(user) {
+	try {
+		const promises = [
+			getApps(user),
+			getOAs(user),
+			getPhones(user),
+			getTechnicals(user),
+			getFinals(user),
+			getOffers(user),
+		];
+		const results = await Promise.all(promises);
+		return results;
+	} catch (err) {
+		console.error(err);
+	}
+}
+
+async function getApps(user) {
+	const entries = await Entry.findAll({
+		where: {
+			user: user,
+			progress: "apply",
+		},
+	});
+
+	return entries.length;
+}
+
+async function getOAs(user) {
+	const entries = await Entry.findAll({
+		where: {
+			user: user,
+			progress: "oa",
+		},
+	});
+	return entries.length;
+}
+
+async function getPhones(user) {
+	const entries = await Entry.findAll({
+		where: {
+			user: user,
+			progress: "phone",
+		},
+	});
+	return entries.length;
+}
+
+async function getTechnicals(user) {
+	const entries = await Entry.findAll({
+		where: {
+			user: user,
+			progress: "technical",
+		},
+	});
+	return entries.length;
+}
+
+async function getFinals(user) {
+	const entries = await Entry.findAll({
+		where: {
+			user: user,
+			progress: "final",
+		},
+	});
+	return entries.length;
+}
+
+async function getOffers(user) {
+	const entries = await Entry.findAll({
+		where: {
+			user: user,
+			progress: "offer",
+		},
+	});
+	return entries.length;
+}
+
 
 // Log into the server
 client.login(config.TOKEN);
