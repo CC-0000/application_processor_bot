@@ -1,7 +1,7 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import config from './config.json' with { type: "json" };
-import { addEntry, deleteEntry, getStats } from './progress';
-import { fireAtTime,fetchDaily } from './lc_daily';  
+import { addEntry, deleteEntry, getStats } from './progress.js';
+import { fireAtTime,fetchDaily } from './lc_daily.js';  
 import { Sequelize, DataTypes  } from 'sequelize';
 
 /*************************
