@@ -54,6 +54,13 @@ client.on('messageCreate', message => {
           message.reply(messageString); 
         })
       }
+      else if (commands.length == 2 && commands[0] == 'check') {
+        getProcess(message.author.username, commands[1]).then((messageString) => {
+          const emoji = '✅';
+          message.react(emoji);
+          message.reply(messageString);
+        })
+      }
     }
   }
 });
@@ -138,10 +145,14 @@ async function deleteEntry(user, company, progress) {
 async function addEntry(user, company, progress) {
 	try {
 		const [_, created] = await Entry.findOrCreate({
-			where: { user: user, company: company, progress: progress },
+			where: { 
+        user: user, 
+        company: company, 
+        progress: progress 
+      },
 			defaults: {},
 		});
-    
+
 		if (!created) {
 			console.log("failed to create the database entry");
 		}
@@ -150,15 +161,55 @@ async function addEntry(user, company, progress) {
 	}
 }
 
-async function getStats(user) {
+// get the dates for a specific company
+async function getProcess(user, company) {
+  let messageString = "";
+  const results = await getStats(user, company);
+  for (let i = 0; i < results.length; i++) {
+    // this means that they have apps
+    if (results[i] != null) {
+      let sentence = (results[i].getUTCMonth() + 1) + "/" + results[i].getUTCDate() + " -> ";
+      switch (i) {
+        case 0:
+          sentence += "apply";
+          break;
+        case 1:
+          sentence += "OA";
+          break;
+        case 2:
+          sentence += "phone";
+          break;
+        case 3:
+          sentence += "technical";
+          break;
+        case 4:
+          sentence += "final";
+          break;
+        case 5:
+          sentence += "offer";
+          break;
+        default:
+          break;
+      }
+      messageString += sentence;
+      messageString += "\n";
+    }
+  }
+  if (messageString.length > 0) {
+    messageString = messageString.slice(0, -1);
+  }
+  return messageString;
+}
+
+async function getStats(user, company = null) {
 	try {
 		const promises = [
-			getApps(user),
-			getOAs(user),
-			getPhones(user),
-			getTechnicals(user),
-			getFinals(user),
-			getOffers(user),
+			getApps(user, company),
+			getOAs(user, company),
+			getPhones(user, company),
+			getTechnicals(user, company),
+			getFinals(user, company),
+			getOffers(user, company),
 		];
 		const results = await Promise.all(promises);
 		return results;
@@ -167,64 +218,141 @@ async function getStats(user) {
 	}
 }
 
-async function getApps(user) {
-	const entries = await Entry.findAll({
-		where: {
-			user: user,
-			progress: "apply",
-		},
-	});
-
+async function getApps(user, company = null) {
+  let entries = [];
+  if (company == null) {
+    entries = await Entry.findAll({
+      where: {
+        user: user,
+        progress: "apply",
+      },
+    });
+  }
+  else {
+    const entry = await Entry.findOne({
+      where: {
+        user: user,
+        company: company,
+        progress: "apply",
+      },
+    });
+    return entry == null ? null : entry.timestamp; // JAVSCRIPT ALLOWS MULTIPLE RETURN TYPES
+  }
 	return entries.length;
 }
 
-async function getOAs(user) {
-	const entries = await Entry.findAll({
-		where: {
-			user: user,
-			progress: "oa",
-		},
-	});
+async function getOAs(user, company = null) {
+  let entries = [];
+  if (company == null) {
+    entries = await Entry.findAll({
+      where: {
+        user: user,
+        progress: "oa",
+      },
+    });
+  }
+  else {
+    const entry = await Entry.findOne({
+      where: {
+        user: user,
+        company: company,
+        progress: "oa",
+      },
+    });
+    return entry == null ? null : entry.timestamp; // JAVSCRIPT ALLOWS MULTIPLE RETURN TYPES
+  }
 	return entries.length;
 }
 
-async function getPhones(user) {
-	const entries = await Entry.findAll({
-		where: {
-			user: user,
-			progress: "phone",
-		},
-	});
+async function getPhones(user, company = null) {
+  let entries = [];
+  if (company == null) {
+    entries = await Entry.findAll({
+      where: {
+        user: user,
+        progress: "phone",
+      },
+    });
+  }
+  else {
+    const entry = await Entry.findOne({
+      where: {
+        user: user,
+        company: company,
+        progress: "phone",
+      },
+    });
+    return entry == null ? null : entry.timestamp; // JAVSCRIPT ALLOWS MULTIPLE RETURN TYPES
+  }
 	return entries.length;
 }
 
-async function getTechnicals(user) {
-	const entries = await Entry.findAll({
-		where: {
-			user: user,
-			progress: "technical",
-		},
-	});
+async function getTechnicals(user, company = null) {
+  let entries = [];
+  if (company == null) {
+    entries = await Entry.findAll({
+      where: {
+        user: user,
+        progress: "technical",
+      },
+    });
+  }
+  else {
+    const entry = await Entry.findOne({
+      where: {
+        user: user,
+        company: company,
+        progress: "technical",
+      },
+    });
+    return entry == null ? null : entry.timestamp; // JAVSCRIPT ALLOWS MULTIPLE RETURN TYPES
+  }
 	return entries.length;
 }
 
-async function getFinals(user) {
-	const entries = await Entry.findAll({
-		where: {
-			user: user,
-			progress: "final",
-		},
-	});
+async function getFinals(user, company = null) {
+  let entries = [];
+  if (company == null) {
+    entries = await Entry.findAll({
+      where: {
+        user: user,
+        progress: "final",
+      },
+    });
+  }
+  else {
+    const entry = await Entry.findOne({
+      where: {
+        user: user,
+        company: company,
+        progress: "final",
+      },
+    });
+    return entry == null ? null : entry.timestamp; // JAVSCRIPT ALLOWS MULTIPLE RETURN TYPES
+  }
 	return entries.length;
 }
 
-async function getOffers(user) {
-	const entries = await Entry.findAll({
-		where: {
-			user: user,
-			progress: "offer",
-		},
-	});
+async function getOffers(user, company = null) {
+  let entries = [];
+  if (company == null) {
+    entries = await Entry.findAll({
+      where: {
+        user: user,
+        progress: "offer",
+      },
+    });
+  }
+  else {
+    const entry = await Entry.findOne({
+      where: {
+        user: user,
+        company: company,
+        progress: "offer",
+      },
+    });
+    return entry == null ? null : entry.timestamp; // JAVSCRIPT ALLOWS MULTIPLE RETURN TYPES
+  }
 	return entries.length;
 }
 
