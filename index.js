@@ -14,39 +14,44 @@ client.on('ready', () => {
 });
 
 client.on('messageCreate', message => {
-  if (message.content.length > 0 && message.content[0] == '!') {
+  if (message.author.bot) {
+    return;
+  }
+  if (message.channel.name == 'progress') {
+    if (message.content.length > 0 && message.content[0] == '!') {
 
-    const commands = message.content.slice(1).split(" ");
-    // convert to all lowercase
-    for (let i = 0; i < commands.length; i++) {
-      commands[i] = commands[i].toLowerCase();
-    }
-    
-    // standard inputs
-    if (commands.length == 3) {
-      // e.g. process meta apply
-      // check what they want to do
-      if (commands[0] == 'process' && checkProgress(commands[2])) {
-        addEntry(message.author.username, commands[1], commands[2]).then(() => {
-          const emoji = '✅';
-          message.react(emoji);      
-        });
+      const commands = message.content.slice(1).split(" ");
+      // convert to all lowercase
+      for (let i = 0; i < commands.length; i++) {
+        commands[i] = commands[i].toLowerCase();
       }
-      else if (commands[0] == 'undo' || commands[0] == 'remove' || commands[0] == 'cancel' || commands[0] == 'rm') {
-        deleteEntry(message.author.username, commands[1], commands[2]).then(() => {
+      
+      // standard inputs
+      if (commands.length == 3) {
+        // e.g. process meta apply
+        // check what they want to do
+        if (commands[0] == 'process' && checkProgress(commands[2])) {
+          addEntry(message.author.username, commands[1], commands[2]).then(() => {
+            const emoji = '✅';
+            message.react(emoji);      
+          });
+        }
+        else if (commands[0] == 'undo' || commands[0] == 'remove' || commands[0] == 'cancel' || commands[0] == 'rm') {
+          deleteEntry(message.author.username, commands[1], commands[2]).then(() => {
+            const emoji = '✅';
+            message.react(emoji);
+          });
+        }
+      }
+      else if (commands.length == 1 && commands[0] == 'stats' ) {
+        getStats(message.author.username).then((results) => {
+          console.log(results);
+          let messageString = "Applications: " + results[0] + "; OAs: " + results[1] + "; Phones: " + results[2] + "; Technicals " + results[3] + "; Finals: " + results[4] + "; Offers: " + results[5];
           const emoji = '✅';
           message.react(emoji);
-        });
+          message.reply(messageString); 
+        })
       }
-    }
-    else if (commands.length == 1 && commands[0] == 'stats' ) {
-      getStats(message.author.username).then((results) => {
-        console.log(results);
-        let messageString = "Applications: " + results[0] + "; OAs: " + results[1] + "; Phones: " + results[2] + "; Technicals " + results[3] + "; Finals: " + results[4] + "; Offers: " + results[5];
-        const emoji = '✅';
-        message.react(emoji);
-        message.reply(messageString); 
-      })
     }
   }
 });
