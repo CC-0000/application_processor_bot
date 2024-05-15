@@ -19,6 +19,7 @@ export function fireAtTime(hour, minute, func) {
 	}, delay);
 }
 
+// queries leetcode for the daily link
 const getDailyQuery = gql`
 	query {
 		activeDailyCodingChallengeQuestion {
@@ -27,19 +28,15 @@ const getDailyQuery = gql`
 	}
 `;
 
-// queries leetcode for the daily link
 export async function fetchDaily() {
 	const res = await request("https://leetcode.com/graphql", getDailyQuery);
 	const link =
 		"https://leetcode.com" + res["activeDailyCodingChallengeQuestion"]["link"];
 
-	const channel = await client.channels.cache.find(
-		(channel) => channel.name === "lc-grind"
-	);
 	const now = new Date();
 	const message_to_send =
 		"Daily " + (now.getUTCMonth() + 1) + "/" + now.getUTCDate() + ": " + link;
-	channel.send({ content: message_to_send });
+	return message_to_send;
 }
 
 function createDateWithUTCTime(hourUTC, minuteUTC) {

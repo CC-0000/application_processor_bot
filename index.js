@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import config from './config.json' with { type: "json" };
-import { fireAtTime,fetchDaily } from './lc_daily.js';  
+import { fetchDaily, fireAtTime } from './lc_daily.js';  
 import { Sequelize, DataTypes  } from 'sequelize';
 
 /*************************
@@ -83,8 +83,16 @@ function checkProgress(progress) {
  *************************/
 fireAtTime(0, 30, () => {
   console.log('fetching and posting daily')
-  fetchDaily();
+  postDailyToThread();
 });
+
+async function postDailyToThread() {
+  const message_to_send = await fetchDaily();
+  const channel = await client.channels.cache.find(
+		(channel) => channel.name === "lc-grind"
+	);
+	channel.send({ content: message_to_send });
+}
 
 
 /*************************
