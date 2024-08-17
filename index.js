@@ -71,7 +71,8 @@ function checkProgress(progress) {
   progress == 'phone' || 
   progress == 'technical' ||
   progress == 'final' ||
-  progress == 'offer') {
+  progress == 'offer' ||
+  progress == 'reject') {
     return true;
   }
   return false;
@@ -226,6 +227,7 @@ async function getStats(user, company = null) {
 			getTechnicals(user, company),
 			getFinals(user, company),
 			getOffers(user, company),
+      getRejections(user, company),
 		];
 		const results = await Promise.all(promises);
 		return results;
@@ -365,6 +367,29 @@ async function getOffers(user, company = null) {
         user: user,
         company: company,
         progress: "offer",
+      },
+    });
+    return entry == null ? null : entry.timestamp; // JAVSCRIPT ALLOWS MULTIPLE RETURN TYPES
+  }
+	return entries.length;
+}
+
+async function getRejections(user, company = null) {
+  let entries = [];
+  if (company == null) {
+    entries = await Entry.findAll({
+      where: {
+        user: user,
+        progress: "reject",
+      },
+    });
+  }
+  else {
+    const entry = await Entry.findOne({
+      where: {
+        user: user,
+        company: company,
+        progress: "reject",
       },
     });
     return entry == null ? null : entry.timestamp; // JAVSCRIPT ALLOWS MULTIPLE RETURN TYPES
