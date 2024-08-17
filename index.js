@@ -48,7 +48,7 @@ client.on('messageCreate', message => {
       else if (commands.length == 1 && commands[0] == 'stats' ) {
         getStats(message.author.username).then((results) => {
           console.log(results);
-          let messageString = "Applications: " + results[0] + "; OAs: " + results[1] + "; Phones: " + results[2] + "; Technicals " + results[3] + "; Finals: " + results[4] + "; Offers: " + results[5];
+          let messageString = "Applications: " + results[0] + "; OAs: " + results[1] + "; Phones: " + results[2] + "; Technicals " + results[3] + "; Finals: " + results[4] + "; Offers: " + results[5] + "; Rejections: " + results[6];
           const emoji = '✅';
           message.react(emoji);
           message.reply(messageString); 
