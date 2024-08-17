@@ -61,6 +61,12 @@ client.on('messageCreate', message => {
           message.reply(messageString);
         })
       }
+      else if (commands.length == 4 && commands[0] == 'processFor' && checkProgress(commands[3])) {
+        addEntry(commands[1], commands[2], commands[3]).then(() => {
+          const emoji = '✅';
+          message.react(emoji);      
+        });
+      }
     }
   }
 });
@@ -205,6 +211,8 @@ async function getProcess(user, company) {
         case 5:
           sentence += "offer";
           break;
+        case 6:
+          sentence += "reject";
         default:
           break;
       }
@@ -214,6 +222,8 @@ async function getProcess(user, company) {
   }
   if (messageString.length > 0) {
     messageString = messageString.slice(0, -1);
+  } else {
+    messageString = 'no results found'
   }
   return messageString;
 }
