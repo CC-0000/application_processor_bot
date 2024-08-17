@@ -94,6 +94,14 @@ async function postDailyToThread() {
 	channel.send({ content: message_to_send });
 }
 
+/********************
+ * Keeping the database alive
+ *******************/
+
+fireAtTime(0, 20, () => {
+  console.log('firing a get stats call')
+  getStats('null')
+})
 
 /*************************
  * Syncing up with Oracle DB
