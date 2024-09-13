@@ -35,9 +35,10 @@ client.on('messageCreate', message => {
         // e.g. process meta apply
         // check what they want to do
         let companyName = '';
-        for (let i = 1; i < lastIndex; i++) {
-          companyName += commands[i];
+        for (let i = 1; i < lastIndex-1; i++) {
+          companyName += commands[i] + " ";
         }
+        companyName += commands[lastIndex-1]
         if (checkProgress(commands[lastIndex])) {
           if (commands[0] == 'process' ) {
             addEntry(message.author.username, companyName, commands[lastIndex]).then(() => {
@@ -61,19 +62,24 @@ client.on('messageCreate', message => {
           message.reply(messageString); 
         })
       }
-      else if (commands.length == 2 && commands[0] == 'check') {
-        getProcess(message.author.username, commands[1]).then((messageString) => {
+      else if (commands.length >= 2 && commands[0] == 'check') {
+        let companyName = '';
+        for (let i = 1; i < lastIndex; i++) {
+          companyName += commands[i] + " ";
+        }
+        companyName += commands[lastIndex];
+        getProcess(message.author.username, companyName).then((messageString) => {
           const emoji = '✅';
           message.react(emoji);
           message.reply(messageString);
         })
       }
       else if (commands.length >= 4 && commands[0] == 'processfor' && checkProgress(commands[lastIndex])) {
-        let lastIndex = commands.length - 1;
         let companyName = '';
-        for (let i = 1; i < lastIndex; i++) {
-          companyName += commands[i];
+        for (let i = 1; i < lastIndex-1; i++) {
+          companyName += commands[i] + " ";
         }
+        companyName += commands[lastIndex-1];
         addEntry(commands[1], companyName, commands[lastIndex]).then(() => {
           const emoji = '✅';
           message.react(emoji);
