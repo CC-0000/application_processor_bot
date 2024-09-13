@@ -1,7 +1,8 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import config from './config.json' with { type: "json" };
-import { fetchDaily, fireAtTime } from './lc_daily.js';  
+import { fetchDaily } from './lc_daily.js';  
 import { Sequelize, DataTypes  } from 'sequelize';
+import cron from 'node-cron';
 
 /*************************
  * Discord Bot Messaging Code
@@ -47,7 +48,6 @@ client.on('messageCreate', message => {
       }
       else if (commands.length == 1 && commands[0] == 'stats' ) {
         getStats(message.author.username).then((results) => {
-          console.log(results);
           let messageString = "Applications: " + results[0] + "; OAs: " + results[1] + "; Phones: " + results[2] + "; Technicals " + results[3] + "; Finals: " + results[4] + "; Offers: " + results[5] + "; Rejections: " + results[6];
           const emoji = '✅';
           message.react(emoji);
@@ -64,7 +64,7 @@ client.on('messageCreate', message => {
       else if (commands.length == 4 && commands[0] == 'processfor' && checkProgress(commands[3])) {
         addEntry(commands[1], commands[2], commands[3]).then(() => {
           const emoji = '✅';
-          message.react(emoji);      
+          message.react(emoji);
         });
       }
     }
@@ -83,14 +83,16 @@ function checkProgress(progress) {
   }
   return false;
 }
-
+/*************************/
 
 /*************************
  * Discord Bot Leetcode Daily Post Code
  *************************/
-fireAtTime(0, 30, () => {
-  console.log('fetching and posting daily')
+
+cron.schedule('0 15 0 * * *', () => {
   postDailyToThread();
+}, {
+  timezone: 'Etc/UTC' // Use UTC time zone
 });
 
 async function postDailyToThread() {
@@ -100,15 +102,7 @@ async function postDailyToThread() {
 	);
 	channel.send({ content: message_to_send });
 }
-
-/********************
- * Keeping the database alive
- *******************/
-
-fireAtTime(0, 20, () => {
-  console.log('firing a get stats call')
-  getStats('null')
-})
+/*************************/
 
 /*************************
  * Syncing up with Oracle DB
@@ -406,7 +400,7 @@ async function getRejections(user, company = null) {
   }
 	return entries.length;
 }
-
+/*************************/
 
 // Log into the server
 client.login(config.TOKEN);
