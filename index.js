@@ -129,7 +129,9 @@ const sequelize = new Sequelize({
   dialect: 'oracle',
   username: config.username,
   password: config.password,
-  dialectOptions: {connectString: config.connectionString}}
+  dialectOptions: {connectString: config.connectionString},
+  logging: false,
+},
 );
 
 const Entry = sequelize.define(
