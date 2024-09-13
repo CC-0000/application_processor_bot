@@ -30,20 +30,27 @@ client.on('messageCreate', message => {
       }
       
       // standard inputs
-      if (commands.length == 3) {
+      let lastIndex = commands.length - 1;
+      if (commands.length >= 3) {
         // e.g. process meta apply
         // check what they want to do
-        if (commands[0] == 'process' && checkProgress(commands[2])) {
-          addEntry(message.author.username, commands[1], commands[2]).then(() => {
-            const emoji = '✅';
-            message.react(emoji);      
-          });
+        let companyName = '';
+        for (let i = 1; i < lastIndex; i++) {
+          companyName += commands[i];
         }
-        else if (commands[0] == 'undo' || commands[0] == 'remove' || commands[0] == 'cancel' || commands[0] == 'rm') {
-          deleteEntry(message.author.username, commands[1], commands[2]).then(() => {
-            const emoji = '✅';
-            message.react(emoji);
-          });
+        if (checkProgress(commands[lastIndex])) {
+          if (commands[0] == 'process' ) {
+            addEntry(message.author.username, companyName, commands[lastIndex]).then(() => {
+              const emoji = '✅';
+              message.react(emoji);      
+            });
+          }
+          else if (commands[0] == 'undo' || commands[0] == 'remove' || commands[0] == 'cancel' || commands[0] == 'rm') {
+            deleteEntry(message.author.username, companyName, commands[lastIndex]).then(() => {
+              const emoji = '✅';
+              message.react(emoji);
+            });
+          }  
         }
       }
       else if (commands.length == 1 && commands[0] == 'stats' ) {
@@ -61,8 +68,13 @@ client.on('messageCreate', message => {
           message.reply(messageString);
         })
       }
-      else if (commands.length == 4 && commands[0] == 'processfor' && checkProgress(commands[3])) {
-        addEntry(commands[1], commands[2], commands[3]).then(() => {
+      else if (commands.length >= 4 && commands[0] == 'processfor' && checkProgress(commands[lastIndex])) {
+        let lastIndex = commands.length - 1;
+        let companyName = '';
+        for (let i = 1; i < lastIndex; i++) {
+          companyName += commands[i];
+        }
+        addEntry(commands[1], companyName, commands[lastIndex]).then(() => {
           const emoji = '✅';
           message.react(emoji);
         });
