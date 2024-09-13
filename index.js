@@ -54,7 +54,7 @@ client.on('messageCreate', message => {
           }  
         }
       }
-      else if (commands.length == 1 && commands[0] == 'stats' ) {
+      if (commands.length == 1 && commands[0] == 'stats' ) {
         getStats(message.author.username).then((results) => {
           let messageString = "Applications: " + results[0] + "; OAs: " + results[1] + "; Phones: " + results[2] + "; Technicals " + results[3] + "; Finals: " + results[4] + "; Offers: " + results[5] + "; Rejections: " + results[6];
           const emoji = '✅';
@@ -62,7 +62,7 @@ client.on('messageCreate', message => {
           message.reply(messageString); 
         })
       }
-      else if (commands.length >= 2 && commands[0] == 'check') {
+      if (commands.length >= 2 && commands[0] == 'check') {
         let companyName = '';
         for (let i = 1; i < lastIndex; i++) {
           companyName += commands[i] + " ";
@@ -74,7 +74,7 @@ client.on('messageCreate', message => {
           message.reply(messageString);
         })
       }
-      else if (commands.length >= 4 && commands[0] == 'processfor' && checkProgress(commands[lastIndex])) {
+      if (commands.length >= 4 && commands[0] == 'processfor' && checkProgress(commands[lastIndex])) {
         let companyName = '';
         for (let i = 1; i < lastIndex-1; i++) {
           companyName += commands[i] + " ";
