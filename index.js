@@ -2,6 +2,7 @@ import { Client, GatewayIntentBits } from 'discord.js';
 import config from './config.json' with { type: "json" };
 import { fetchDaily } from './lc_daily.js';  
 import { Sequelize, DataTypes  } from 'sequelize';
+import fs from 'node:fs/promises';
 import cron from 'node-cron';
 
 /*************************
@@ -113,12 +114,41 @@ cron.schedule('0 15 0 * * *', () => {
   timezone: 'Etc/UTC' // Use UTC time zone
 });
 
+cron.schedule('0 45 0 * * *', () => { // first backup
+  postDailyToThread();
+}, {
+  timezone: 'Etc/UTC' 
+});
+
+cron.schedule('0 15 1 * * *', () => { // second backup
+  postDailyToThread();
+}, {
+  timezone: 'Etc/UTC' 
+});
+
+cron.schedule('0 45 1 * * *', () => { // third backup
+  postDailyToThread();
+}, {
+  timezone: 'Etc/UTC' 
+});
+
 async function postDailyToThread() {
+  // read in the currently last stored date
+  try {
+    const data = await fs.readFile('./dateStore.txt', { encoding: 'utf8' });
+    const today = new Date();
+    const dayOfMonth = today.getUTCDate().toString();
+    if (data == dayOfMonth) {
+      return;
+    }  
+  } catch(_) {}
+
   const message_to_send = await fetchDaily();
   const channel = await client.channels.cache.find(
 		(channel) => channel.name === "lc-grind"
 	);
 	channel.send({ content: message_to_send });
+  await fs.writeFile('./dateStore.txt', dayOfMonth);
 }
 /*************************/
 
