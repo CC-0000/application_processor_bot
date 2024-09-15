@@ -132,7 +132,7 @@ cron.schedule('0 45 1 * * *', () => { // third backup
   timezone: 'Etc/UTC' 
 });
 
-cron.schedule('0 45 1 * * *', () => { // fourth backup
+cron.schedule('0 15 2 * * *', () => { // fourth backup
   postDailyToThread();
 }, {
   timezone: 'Etc/UTC' 
