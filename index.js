@@ -132,12 +132,19 @@ cron.schedule('0 45 1 * * *', () => { // third backup
   timezone: 'Etc/UTC' 
 });
 
+cron.schedule('0 45 1 * * *', () => { // fourth backup
+  postDailyToThread();
+}, {
+  timezone: 'Etc/UTC' 
+});
+
 async function postDailyToThread() {
   // read in the currently last stored date
+  const today = new Date();
+  const dayOfMonth = today.getUTCDate().toString();
+
   try {
     const data = await fs.readFile('./dateStore.txt', { encoding: 'utf8' });
-    const today = new Date();
-    const dayOfMonth = today.getUTCDate().toString();
     if (data == dayOfMonth) {
       return;
     }  
